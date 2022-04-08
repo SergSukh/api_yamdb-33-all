@@ -1,6 +1,7 @@
+from unicodedata import category
 import uuid
 
-from rest_framework import status, viewsets, filters
+from rest_framework import status, viewsets, filters, mixins
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
@@ -158,7 +159,10 @@ class TitlesViewSet(viewsets.ModelViewSet):
         return TitlesSerializer
 
 
-class CategoriesViewSet(viewsets.ModelViewSet):
+class CategoriesViewSet(mixins.CreateModelMixin,
+                                mixins.ListModelMixin,
+                                mixins.DestroyModelMixin,
+                                viewsets.GenericViewSet):
     queryset = Categories.objects.all()
     serializer_class = CategoriesSerializer
     lookup_field = 'slug'
@@ -169,14 +173,27 @@ class CategoriesViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name', 'slug')
 
+    def destroy(self, request, *args, **kwargs):
+        category = get_object_or_404(Categories, slug=self.kwargs.get('slug'))
+        category.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-class GenresViewSet(viewsets.ModelViewSet):
+
+class GenresViewSet(mixins.CreateModelMixin,
+                                mixins.ListModelMixin,
+                                mixins.DestroyModelMixin,
+                                viewsets.GenericViewSet):
     queryset = Genres.objects.all()
     serializer_class = GenresSerializer
     lookup_field = 'slug'
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name', 'slug')
+
+    def destroy(self, request, *args, **kwargs):
+        genre = get_object_or_404(Genres, slug=self.kwargs.get('slug'))
+        genre.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class AuthorViewSet(viewsets.ModelViewSet):
