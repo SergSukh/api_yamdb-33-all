@@ -29,6 +29,7 @@ from django.core.mail import send_mail
 from .permissions import (
     IsAdminOrReadOnly,
     ReadOnlyOrAdmins,
+    AuthorAndStaffOrReadOnly
 )
 from .serializers import (
     SignUpSerializer,
@@ -204,7 +205,7 @@ class AuthorViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewsSerializer
     pagination_class = CommentPagination
-    permission_classes = (ReadOnlyOrOwnerOrAllAdmins,)
+    permission_classes = [AuthorAndStaffOrReadOnly]
 
     def get_queryset(self):
         # title_id = self.kwargs.get('id')
@@ -229,7 +230,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentsSerializer
     pagination_class = CommentPagination
-    permission_classes = (ReadOnlyOrOwnerOrAllAdmins,)
+    permission_classes = [AuthorAndStaffOrReadOnly]
 
     def get_queryset(self):
         # Получаем id title из эндпоинта

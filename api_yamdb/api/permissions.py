@@ -82,12 +82,16 @@ class ModeratorOrReadOnly(BasePermission):
             return False
 
 
-class AuthorOrReadOnly(BasePermission):
+class AuthorAndStaffOrReadOnly(BasePermission):
+    def has_permission(self, request, view):
+        if request.user.is_authenticated:
+            return True
+        return request.method in SAFE_METHODS
+
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:
             return True
         if request.user.is_authenticated:
-            if request.user.role in MODERATOR:
+            if (request.user.role in MODERATOR):
                 return True
-        else:
-            return obj.author == request.user
+        return obj.author == request.user
