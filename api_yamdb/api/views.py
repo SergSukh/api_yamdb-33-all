@@ -219,12 +219,11 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # title_id = self.kwargs.get('title_id')
         title = get_object_or_404(Titles, id=self.kwargs.get('id'))
-        try:
+        if serializer.is_valid():
+            if title.reviews.filter(author=self.request.user).exists():
+                return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
+        else:
             serializer.save(author=self.request.user, title=title)
-        except IntegrityError:
-            raise ValidationError(
-                'Reviews with this Title and Owner already exists.'
-            )
 
 
 class CommentViewSet(viewsets.ModelViewSet):
