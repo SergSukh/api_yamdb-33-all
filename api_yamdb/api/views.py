@@ -208,22 +208,22 @@ class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = [AuthorAndStaffOrReadOnly]
 
     def get_queryset(self):
-        # title_id = self.kwargs.get('id')
-        title = get_object_or_404(Titles, id=self.kwargs.get('id'))
-        #new_queryset = Reviews.objects.filter(
-        #    title__pk=title_id
-        #).order_by('-id')
+        title = get_object_or_404(Titles, pk=self.kwargs.get('id'))
         new_queryset = title.reviews.all()
         return new_queryset
 
+    def create(self, request, *args, **kwargs):
+        title = get_object_or_404(Titles, pk=self.kwargs.get('id'))
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if not title.reviews.filter(author=self.request.user).exists():
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     def perform_create(self, serializer):
-        # title_id = self.kwargs.get('title_id')
-        title = get_object_or_404(Titles, id=self.kwargs.get('id'))
-        if serializer.is_valid():
-            if title.reviews.filter(author=self.request.user).exists():
-                return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            serializer.save(author=self.request.user, title=title)
+        title = get_object_or_404(Titles, pk=self.kwargs.get('id'))
+        return serializer.save(author=self.request.user, title=title)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
