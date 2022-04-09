@@ -101,7 +101,7 @@ class CategoriesSerializer(serializers.ModelSerializer):
 
 
 class TitlesSerializer(serializers.ModelSerializer):
-    """Основной метод получения информации."""
+    """Основной метод записи информации."""
 
     category = serializers.SlugRelatedField(
         slug_field='slug',
@@ -175,30 +175,11 @@ class TitlesViewSerializer(serializers.ModelSerializer):
             )
         ]
 
-    def validate_year(self, value):
-        current_year = dt.date.today().year
-        if value > current_year:
-            raise serializers.ValidationError('ПРоверьте год')
-        return value
-
     def get_rating(self, obj):
         rating = obj.reviews.all().aggregate(score=Avg('score'))
         if rating['score']:
             return round(rating['score'], 2)
         return None
-
-    def create(self, validated_data):
-        """Определяем наличие жанров и прописываем."""
-        if 'genres' not in self.initial_data:
-            title = Titles.objects.create(**validated_data)
-            return title
-        genres = validated_data.pop('genres')
-        title = Titles.objects.create(**validated_data)
-        for genre in genres:
-            current_genre, status = Genres.objects.get_or_create(**genre)
-            GenreTitle.objects.create(genre=current_genre, title=title)
-
-        return title
         
         
 class ReviewsSerializer(serializers.ModelSerializer):
