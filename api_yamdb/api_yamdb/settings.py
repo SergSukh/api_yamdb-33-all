@@ -25,10 +25,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'rest_framework_simplejwt',
-    'composition.apps.CompositionConfig',
     'api.apps.ApiConfig',
     'reviews.apps.ReviewsConfig',
-    'rest_framework.authtoken',
+    'users.apps.UsersConfig',
 ]
 
 MIDDLEWARE = [
@@ -110,7 +109,7 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
 
-AUTH_USER_MODEL = 'reviews.User'
+AUTH_USER_MODEL = 'users.User'
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
@@ -123,12 +122,15 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ],
+    'DEFAULT_FILTER_BACKENDS': (
+        'rest_framework.filters.SearchFilter',
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 5,
 }
 
 SIMPLE_JWT = {
-
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
